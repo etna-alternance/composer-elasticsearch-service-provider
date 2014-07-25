@@ -12,8 +12,8 @@
     ],
     "require": {
         "php": ">=5.4",
-        "silex/silex": "1.*@dev",
-        "guzzle/guzzle": "3.x@stable"
+        "silex/silex": "1.x",
+        "guzzle/guzzle": "3.x"
     },
     "require-dev": {
     },

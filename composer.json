@@ -12,17 +12,15 @@
     ],
     "require": {
         "php": ">=5.5",
-        "silex/silex": "1.x",
-        "guzzle/guzzle": "3.x"
-    },
-    "require-dev": {
+        "silex/silex": "~2.0@dev",
+        "elasticsearch/elasticsearch": "~2.0"
     },
     "config": {
         "bin-dir": "bin"
     },
     "autoload": {
         "psr-4": {
-            "ETNA\\Silex\\Provider\\ElasticSearch\\": "src"
+            "ETNA\\Silex\\Provider\\Elasticsearch\\": "src"
         }
     },
     "extra": {

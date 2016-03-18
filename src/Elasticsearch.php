@@ -102,15 +102,15 @@ class Elasticsearch implements ServiceProviderInterface
                 echo "Index {$app["elasticsearch.index"]}-{$app["version"]} doesn't exist... \n";
             }
 
-            // On récupère les settings et le mapping pour créer l'index
+            // On récupère les settings et les mappings pour créer l'index
             $settings = json_decode(file_get_contents($app["elasticsearch_settings_path"]), true);
-            $mapping  = json_decode(file_get_contents($app["elasticsearch_mapping_path"]), true);
+            $mappings = json_decode(file_get_contents($app["elasticsearch_mappings_path"]), true);
 
             $index_params = [
                 "index" => "{$app["elasticsearch.index"]}-{$app["version"]}",
                 "body"  => [
                     "settings" => $settings,
-                    "mapping"  => $mapping
+                    "mappings" => $mappings
                 ]
             ];
 

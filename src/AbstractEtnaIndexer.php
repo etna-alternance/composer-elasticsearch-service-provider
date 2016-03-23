@@ -4,7 +4,7 @@ namespace ETNA\Silex\Provider\Elasticsearch;
 
 use Silex\Application;
 
-abstract class AbstractETNAIndexer
+abstract class AbstractEtnaIndexer
 {
     protected $app;
 

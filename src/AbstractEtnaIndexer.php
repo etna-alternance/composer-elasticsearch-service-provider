@@ -11,12 +11,13 @@ abstract class AbstractEtnaIndexer
     /**
      * @param Application $app
      */
-    public function __construct(Application $app)
+    public function __construct(Application $app, $name)
     {
-        $this->app                                  = $app;
-        $this->app['elasticsearch.reindex']         = [$this, 'reindex'];
-        $this->app['elasticsearch.put_document']    = [$this, 'putDocument'];
-        $this->app['elasticsearch.remove_document'] = [$this, 'removeDocument'];
+        $this->app = $app;
+
+        $this->app["elasticsearch.{$name}.reindex"]         = [$this, 'reindex'];
+        $this->app["elasticsearch.{$name}.put_document"]    = [$this, 'putDocument'];
+        $this->app["elasticsearch.{$name}.remove_document"] = [$this, 'removeDocument'];
     }
 
     /**

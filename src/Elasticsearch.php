@@ -56,32 +56,32 @@ class Elasticsearch implements ServiceProviderInterface
             throw new \Exception('$app["application_path"] is not set');
         }
 
-        // On vérifie qu'on a bien un indexer
-        if (false === isset($app["elasticsearch.indexer"]) ||
-            false === is_subclass_of($app["elasticsearch.indexer"], "ETNA\Silex\Provider\Elasticsearch\AbstractETNAIndexer")) {
-            throw new \Exception('You must provide $app["elasticsearch.indexer see AbstractETNAIndexer"]');
-        }
+        $app["elasticsearch.names"] = array_keys($this->es_options);
+        foreach ($this->es_options as $name => $es_option) {
+            // On vérifie qu'on a bien un indexer
+            if (false === isset($app["elasticsearch.{$name}.indexer"]) ||
+                false === is_subclass_of($app["elasticsearch.{$name}.indexer"], "ETNA\Silex\Provider\Elasticsearch\AbstractETNAIndexer")) {
+                throw new \Exception('You must provide $app["elasticsearch.{$name}.indexer"] see AbstractETNAIndexer');
+            }
 
-        foreach ($this->es_options as $es_option) {
             $parsed_url = parse_url($es_option['host']);
             $index      = ltrim($parsed_url['path'], '/');
 
-            $app["elasticsearch.server"] = str_replace($parsed_url['path'], '', $es_option['host']) . "/";
-            $app["elasticsearch.index"]  = $index;
-            $app["elasticsearch.type"]   = $es_option['type'];
-            break;
-        }
+            $app["elasticsearch.{$name}.server"] = str_replace($parsed_url['path'], '', $es_option['host']) . "/";
+            $app["elasticsearch.{$name}.index"]  = $index;
+            $app["elasticsearch.{$name}.type"]   = $es_option['type'];
 
-        $app["elasticsearch"] = ClientBuilder::create()
-                ->setHosts([$app["elasticsearch.server"]])
+            $app["elasticsearch.{$name}"] = ClientBuilder::create()
+                ->setHosts([$app["elasticsearch.{$name}.server"]])
                 ->build();
+        }
 
         $app['elasticsearch.create_index'] = [$this, 'createIndex'];
         $app['elasticsearch.lock']         = [$this, 'lock'];
         $app['elasticsearch.unlock']       = [$this, 'unlock'];
     }
 
-    public function createIndex($reset = false)
+    public function createIndex($name, $reset = false)
     {
         $app = $this->app;
 
@@ -90,24 +90,24 @@ class Elasticsearch implements ServiceProviderInterface
         }
 
         if (true === $reset) {
-            echo "\nCreating elasticsearch index... {$app["elasticsearch.index"]}\n";
-            $this->unlock();
+            echo "\nCreating elasticsearch index... {$app["elasticsearch.$name.index"]}\n";
+            $this->unlock($name);
 
             // On supprime l'index
             try {
-                $app["elasticsearch"]->indices()->delete(
-                    ["index" => "{$app["elasticsearch.index"]}-{$app["version"]}"]
+                $app["elasticsearch.{$name}"]->indices()->delete(
+                    ["index" => "{$app["elasticsearch.$name.index"]}-{$app["version"]}"]
                 );
             } catch (\Exception $exception) {
-                echo "Index {$app["elasticsearch.index"]}-{$app["version"]} doesn't exist... \n";
+                echo "Index {$app["elasticsearch.$name.index"]}-{$app["version"]} doesn't exist... \n";
             }
 
             // On récupère les settings et les mappings pour créer l'index
-            $settings = json_decode(file_get_contents($app["elasticsearch_settings_path"]), true);
-            $mappings = json_decode(file_get_contents($app["elasticsearch_mappings_path"]), true);
+            $settings = json_decode(file_get_contents($app["elasticsearch_{$name}_settings_path"]), true);
+            $mappings = json_decode(file_get_contents($app["elasticsearch_{$name}_mappings_path"]), true);
 
             $index_params = [
-                "index" => "{$app["elasticsearch.index"]}-{$app["version"]}",
+                "index" => "{$app["elasticsearch.$name.index"]}-{$app["version"]}",
                 "body"  => [
                     "settings" => $settings,
                     "mappings" => $mappings
@@ -115,33 +115,33 @@ class Elasticsearch implements ServiceProviderInterface
             ];
 
             // Création de l'index
-            $app["elasticsearch"]->indices()->create($index_params);
+            $app["elasticsearch.$name"]->indices()->create($index_params);
 
             // Rajout de l'alias
             $alias = [
-                "index" => "{$app["elasticsearch.index"]}-{$app["version"]}",
-                "name"  => $app["elasticsearch.index"]
+                "index" => "{$app["elasticsearch.$name.index"]}-{$app["version"]}",
+                "name"  => $app["elasticsearch.{$name}.index"]
             ];
 
             try {
-                $app["elasticsearch"]->indices()->deleteAlias($alias);
+                $app["elasticsearch.{$name}"]->indices()->deleteAlias($alias);
             } catch (\Exception $e) {
                 echo "Alias doesn't exist... \n";
             }
-            $app["elasticsearch"]->indices()->putAlias($alias);
+            $app["elasticsearch.{$name}"]->indices()->putAlias($alias);
 
-            echo "Index {$app["elasticsearch.index"]} created successfully!\n\n";
+            echo "Index {$app["elasticsearch.$name.index"]} created successfully!\n\n";
         }
     }
 
-    public function lock()
+    public function lock($name)
     {
-        $this->lockOrUnlockElasticSearch("lock");
+        $this->lockOrUnlockElasticSearch($name, "lock");
     }
 
-    public function unlock()
+    public function unlock($name)
     {
-        $this->lockOrUnlockElasticSearch("unlock");
+        $this->lockOrUnlockElasticSearch($name, "unlock");
     }
 
     /**
@@ -149,18 +149,18 @@ class Elasticsearch implements ServiceProviderInterface
      *
      * @param string $action "lock" ou "unlock" pour faire l'action qui porte le même nom
      */
-    private function lockOrUnlockElasticSearch($action)
+    private function lockOrUnlockElasticSearch($name, $action)
     {
         switch (true) {
             case false === isset($this->app):
-            case false === isset($this->app["elasticsearch.server"]):
-            case false === isset($this->app["elasticsearch.index"]):
+            case false === isset($this->app["elasticsearch.{$name}.server"]):
+            case false === isset($this->app["elasticsearch.{$name}.index"]):
                 throw new \Exception(__METHOD__ . "::{$action}: Missing parameter");
         }
 
         $action = ("lock" === $action) ? "true" : "false";
 
-        $server = $this->app["elasticsearch.server"] . $this->app["elasticsearch.index"];
+        $server = $this->app["elasticsearch.{$name}.server"] . $this->app["elasticsearch.{$name}.index"];
         exec(
             "curl -XPUT '" . $server . "/_settings' -d '
             {

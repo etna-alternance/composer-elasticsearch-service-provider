@@ -164,7 +164,7 @@ class Elasticsearch implements ServiceProviderInterface
 
             try {
                 $app["elasticsearch.{$name}"]->indices()->deleteMapping([
-                    "index" => $name,
+                    "index" => $app["elasticsearch.{$name}.index"],
                     "type"  => $type
                 ]);
             } catch (\Exception $exception) {
@@ -172,7 +172,7 @@ class Elasticsearch implements ServiceProviderInterface
             }
 
             $app["elasticsearch.{$name}"]->indices()->putMapping([
-                "index" => $name,
+                "index" => $app["elasticsearch.{$name}.index"],
                 "type"  => $type,
                 "body"  => $mapping
             ]);

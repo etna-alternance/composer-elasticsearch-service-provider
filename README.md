@@ -62,6 +62,16 @@ class IndexNameElasticsearchIndexer extends AbstractETNAIndexer
         parent::__construct($app, "index_name");
     }
 
+    protected function indexOneMyFirstType($id)
+    {
+      //Code here
+    }
+
+    protected function indexOneMySecondType($id)
+    {
+      //Code here
+    }
+
     protected function indexMyFirstType()
     {
       //Code here

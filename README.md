@@ -30,17 +30,25 @@ Modifier `composer.json` :
 
 Dans le fichier d'env :
 
+ - Une variable <INDEX_NAME>_ELASTICSEARCH_HOST qui contient l'adresse et le nom de l'index ES
+ - Une variable <INDEX_NAME>_ELASTICSEARCH_TYPES qui contient la liste des types de l'index séparés par une `,`
+
 ```
 putenv("INDEX_NAME_ELASTICSEARCH_HOST=http://elasticsearch.etna-alternance.eu:9200/index_name");
-putenv("INDEX_NAME_ELASTICSEARCH_TYPE=my_type");
+putenv("INDEX_NAME_ELASTICSEARCH_TYPES=my_first_type,my_second_type");
 
 putenv("OTHER_INDEX_NAME_ELASTICSEARCH_HOST=http://elasticsearch.etna-alternance.eu:9200/other_index_name");
-putenv("OTHER_INDEX_NAME_ELASTICSEARCH_TYPE=my_other_type");
+putenv("OTHER_INDEX_NAME_ELASTICSEARCH_TYPES=my_other_type");
 ```
 
 ###Register
 
 Pour chaque index différent créer une classe `IndexElasticsearch` qui hérite de `AbstractEtnaIndexer`
+Il faut implémenter une foncion par type de l'index pour indexer son contenu.
+
+Par exemple pour l'index `index_name` il faudra implémenter (comme dans l'exemple suivant) les fonctions :
+ - indexMyFirstType
+ - indexMySecondType
 
 ```
 use ETNA\Silex\Provider\Elasticsearch\AbstractETNAIndexer;
@@ -54,22 +62,49 @@ class IndexNameElasticsearchIndexer extends AbstractETNAIndexer
         parent::__construct($app, "index_name");
     }
 
-    public function reindex()
+    protected function indexOneMyFirstType($id)
     {
       //Code here
     }
 
-    public function putDocument(Entity $entity = null)
+    protected function indexOneMySecondType($id)
     {
       //Code here
     }
 
-    public function removeDocument(Entity $entity = null)
+    protected function indexMyFirstType()
+    {
+      //Code here
+    }
+
+    protected function indexMySecondType()
+    {
+      //Code here
+    }
+
+    public function putDocument($type, Entity $entity = null)
+    {
+      //Code here
+    }
+
+    public function removeDocument($type, Entity $entity = null)
     {
       //Code here
     }
 }
 ```
+
+Les paramêtres de l'index vont se chercher dans un dossier.
+Pour indiquer à l'application ou est ce dossier :
+```
+$app["elasticsearch_index_name_parameters_path"] = "my/path/to/folder";
+```
+
+Ce dossier doit avoir l'arborescence suivante :
+  - IndexNameParameters :
+    - settings.json : Settings de l'index
+    - my_first_type-mapping.json : Mapping pour le type my_first_type
+    - my_second_type-mapping.json : Mapping pour le type my_second_type
 
 Puis dans le fichier de configuration :
 

@@ -148,11 +148,11 @@ class Elasticsearch implements ServiceProviderInterface
         }
 
         if (!in_array($type, $app["elasticsearch.{$name}.types"])) {
-            throw new \Exception("Application is not configured for type {$name}/{$type}");
+            throw new \Exception("Application is not configured for type {$app["elasticsearch.$name.index"]}/{$type}");
         }
 
         if (true === $reset) {
-            echo "\nCreating elasticsearch type {$type} for index {$name}\n";
+            echo "\nCreating elasticsearch type {$type} for index {$app["elasticsearch.$name.index"]}\n";
 
             $parameters_path = $app["elasticsearch_{$name}_parameters_path"];
             if (!file_exists("{$parameters_path}/{$type}-mapping.json")) {
@@ -168,7 +168,7 @@ class Elasticsearch implements ServiceProviderInterface
                     "type"  => $type
                 ]);
             } catch (\Exception $exception) {
-                echo "Type {$name}/{$type} doesn't exist... \n";
+                echo "Type {$app["elasticsearch.$name.index"]}/{$type} doesn't exist... \n";
             }
 
             $app["elasticsearch.{$name}"]->indices()->putMapping([
@@ -177,7 +177,7 @@ class Elasticsearch implements ServiceProviderInterface
                 "body"  => $mapping
             ]);
 
-            echo "Type {$name}/{$type} created successfully!\n\n";
+            echo "Type {$app["elasticsearch.$name.index"]}/{$type} created successfully!\n\n";
         }
     }
 

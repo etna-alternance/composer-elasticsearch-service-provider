@@ -60,8 +60,8 @@ class Elasticsearch implements ServiceProviderInterface
         foreach ($this->es_options as $name => $es_option) {
             // On vérifie qu'on a bien un indexer
             if (false === isset($app["elasticsearch.{$name}.indexer"]) ||
-                false === is_subclass_of($app["elasticsearch.{$name}.indexer"], "ETNA\Silex\Provider\Elasticsearch\AbstractETNAIndexer")) {
-                throw new \Exception('You must provide $app["elasticsearch.{$name}.indexer"] see AbstractETNAIndexer');
+                false === is_subclass_of($app["elasticsearch.{$name}.indexer"], "ETNA\Silex\Provider\Elasticsearch\AbstractEtnaIndexer")) {
+                throw new \Exception('You must provide $app["elasticsearch.{$name}.indexer"] see AbstractEtnaIndexer');
             }
 
             $parsed_url = parse_url($es_option['host']);

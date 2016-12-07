@@ -98,6 +98,16 @@ class Elasticsearch implements ServiceProviderInterface
             echo "\nCreating elasticsearch index... {$app["elasticsearch.$name.index"]}\n";
             $this->unlock($name);
 
+            $alias = [
+                "index" => "{$app["elasticsearch.$name.index"]}-{$app["version"]}",
+                "name"  => $app["elasticsearch.{$name}.index"]
+            ];
+            try {
+                $app["elasticsearch.{$name}"]->indices()->deleteAlias($alias);
+            } catch (\Exception $e) {
+                echo "Alias doesn't exist... \n";
+            }
+
             // On supprime l'index
             try {
                 $app["elasticsearch.{$name}"]->indices()->delete(
@@ -119,18 +129,7 @@ class Elasticsearch implements ServiceProviderInterface
             $app["elasticsearch.$name"]->indices()->create($index_params);
 
             // Rajout de l'alias
-            $alias = [
-                "index" => "{$app["elasticsearch.$name.index"]}-{$app["version"]}",
-                "name"  => $app["elasticsearch.{$name}.index"]
-            ];
-
-            try {
-                $app["elasticsearch.{$name}"]->indices()->deleteAlias($alias);
-            } catch (\Exception $e) {
-                echo "Alias doesn't exist... \n";
-            }
             $app["elasticsearch.{$name}"]->indices()->putAlias($alias);
-
             echo "Index {$app["elasticsearch.$name.index"]} created successfully!\n\n";
 
             foreach ($app["elasticsearch.{$name}.types"] as $type) {

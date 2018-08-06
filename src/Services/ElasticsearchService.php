@@ -59,7 +59,7 @@ class ElasticsearchService
      *
      * @param string $elasticsearch_name Le nom de l'elasticsearch
      *
-     * @return Elasticsearch\Client Le client elasticsearch
+     * @return \Elasticsearch\Client Le client elasticsearch
      */
     public function getClient($elasticsearch_name): \Elasticsearch\Client
     {
@@ -75,7 +75,7 @@ class ElasticsearchService
      *
      * @param string $elasticsearch_name Le nom de l'elasticsearch
      *
-     * @return ETNA\Elasticsearch\AbstractEtnaIndexer
+     * @return \ETNA\Elasticsearch\AbstractEtnaIndexer
      */
     public function getIndexer($elasticsearch_name): \ETNA\Elasticsearch\AbstractEtnaIndexer
     {

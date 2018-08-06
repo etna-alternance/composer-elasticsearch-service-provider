@@ -40,7 +40,7 @@
             },
             "number_of_replicas": "1",
             "version": {
-                "created": "1070699"
+                "created": "#\\d+#"
             },
             "uuid": "#[A-Za-z0-9\\-\\_]{22}#"
         }

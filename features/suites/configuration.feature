@@ -15,13 +15,13 @@ Scénario: Configurer ElasticsearchBundle comme il faut
         "elasticsearch.contract.indexer": "TestApp\\Utils\\Indexers\\ContractIndexer",
         "elasticsearch.contract.server": "http://mysql.etna.localhost:9200/",
         "elasticsearch.contract.index": "contractmanager",
-        "elasticsearch.contract.configuration_path": "/Users/dubost_g/ETNA/composer-elasticsearch-service-provider/TestApp/config/elasticsearch/contract",
+        "elasticsearch.contract.configuration_path": "#.*/TestApp/config/elasticsearch/contract#",
         "elasticsearch.auth.host": "http://mysql.etna.localhost:9200/auth",
         "elasticsearch.auth.types": ["user"],
         "elasticsearch.auth.indexer": "TestApp\\Utils\\Indexers\\ContractIndexer",
         "elasticsearch.auth.server": "http://mysql.etna.localhost:9200/",
         "elasticsearch.auth.index": "auth",
-        "elasticsearch.auth.configuration_path": "/Users/dubost_g/ETNA/composer-elasticsearch-service-provider/TestApp/config/elasticsearch/auth"
+        "elasticsearch.auth.configuration_path": "#.*/TestApp/config/elasticsearch/auth#"
     }
     """
     Et          le service "elasticsearch.elasticsearch_service" devrait exister

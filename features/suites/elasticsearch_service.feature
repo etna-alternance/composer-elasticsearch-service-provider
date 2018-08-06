@@ -19,12 +19,6 @@ Scénario: Utiliser un client qui n'existe pas
     Alors       ca ne devrait pas s'être bien déroulé
     Et          l'exception devrait avoir comme message "There is no available client for unimplemented"
 
-Scénario: Créer un index sur un elasticsearch configuré
-    Etant donné que je crée l'index sur l'elasticsearch auth
-    Alors       ca devrait s'être bien déroulé
-    Et          les settings de l'elasticsearch auth devraient être identique à "base_settings.json"
-    #Vérifier les settings et les types
-
 Scénario: Créer un index avec l'option reset sur un elasticsearch configuré
     Etant donné que je reset l'index sur l'elasticsearch auth
     Alors       ca devrait s'être bien déroulé

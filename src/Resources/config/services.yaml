@@ -1,0 +1,7 @@
+services:
+    elasticsearch.elasticsearch_service:
+        class: 'ETNA\Elasticsearch\Services\ElasticsearchService'
+        autowire: true
+        public: true # Afin que les commandes puissent accéder au service, comme on ne peut utiliser l'injection
+
+    ETNA\Elasticsearch\Services\ElasticsearchService: '@elasticsearch.elasticsearch_service'

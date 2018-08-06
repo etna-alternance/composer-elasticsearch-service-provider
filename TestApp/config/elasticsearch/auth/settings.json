@@ -1,0 +1,35 @@
+{
+    "index": {
+        "analysis": {
+            "analyzer": {
+                "default": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": [
+                        "lowercase",
+                        "asciifolding",
+                        "fr_stop",
+                        "elision",
+                        "fr_snowball"
+                    ]
+                },
+                "lowercase": {
+                    "type": "custom",
+                    "tokenizer": "standard",
+                    "filter": ["lowercase"]
+                }
+            },
+            "filter": {
+                "fr_stop": {
+                    "type": "stop",
+                    "stopwords": "french"
+                },
+                "fr_snowball": {
+                    "type": "snowball",
+                    "language": "French"
+                }
+            }
+        }
+    }
+}
+

@@ -1,0 +1,48 @@
+{
+    "settings": {
+        "index": {
+            "number_of_shards": "5",
+            "blocks": {
+                "read_only": "false"
+            },
+            "creation_date": "#^[0-9]+$#",
+            "analysis": {
+                "filter": {
+                    "fr_stop": {
+                        "type": "stop",
+                        "stopwords": "french"
+                    },
+                    "fr_snowball": {
+                        "type": "snowball",
+                        "language": "French"
+                    }
+                },
+                "analyzer": {
+                    "lowercase": {
+                        "filter": [
+                            "lowercase"
+                        ],
+                        "type": "custom",
+                        "tokenizer": "standard"
+                    },
+                    "default": {
+                        "filter": [
+                            "lowercase",
+                            "asciifolding",
+                            "fr_stop",
+                            "elision",
+                            "fr_snowball"
+                        ],
+                        "type": "custom",
+                        "tokenizer": "standard"
+                    }
+                }
+            },
+            "number_of_replicas": "1",
+            "version": {
+                "created": "1070699"
+            },
+            "uuid": "#[A-Za-z0-9\\-\\_]{22}#"
+        }
+    }
+}

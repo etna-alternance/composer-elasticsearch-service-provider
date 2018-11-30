@@ -1,12 +1,8 @@
 <?php
 /**
- * Définition de la classe ElasticsearchBundle.
- *
- * Point d'entrée de ce bundle configure et intéragit avec une instance elasticsearch
+ * PHP version 7.1
  *
  * @author BLU <dev@etna-alternance.net>
- *
- * @version 3.0.0
  */
 
 declare(strict_types=1);

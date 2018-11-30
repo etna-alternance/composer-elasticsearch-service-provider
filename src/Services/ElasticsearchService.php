@@ -1,18 +1,16 @@
 <?php
 /**
- * Définition de la classe ElasticsearchService.
+ * PHP version 7.1
  *
  * @author BLU <dev@etna-alternance.net>
- *
- * @version 3.0.0
  */
 
 declare(strict_types=1);
 
 namespace ETNA\Elasticsearch\Services;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Elasticsearch\ClientBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Cette classe contient tout ce qu'il faut pour intéragir simplement avec elasticsearch au sein d'une application.
@@ -101,10 +99,10 @@ class ElasticsearchService
         }
 
         if (true === $reset) {
-            echo "\nCreating elasticsearch index... {$container->getParameter("elasticsearch.$name.index")}\n";
+            echo "\nCreating elasticsearch index... {$container->getParameter("elasticsearch.${name}.index")}\n";
             $this->unlock($name);
 
-            $index = "{$container->getParameter("elasticsearch.$name.index")}-{$container->getParameter('version')}";
+            $index = "{$container->getParameter("elasticsearch.${name}.index")}-{$container->getParameter('version')}";
             $alias = [
                 'index' => $index,
                 'name'  => $container->getParameter("elasticsearch.{$name}.index"),
@@ -126,7 +124,7 @@ class ElasticsearchService
 
             $parameters_path = $container->getParameter("elasticsearch.{$name}.configuration_path");
             // On récupère les settings et les mappings pour créer l'index
-            $settings = json_decode(file_get_contents("$parameters_path/settings.json"), true);
+            $settings = json_decode(file_get_contents("${parameters_path}/settings.json"), true);
 
             $index_params = [
                 'index' => $index,
@@ -137,7 +135,7 @@ class ElasticsearchService
 
             // Rajout de l'alias
             $this->clients[$name]->indices()->putAlias($alias);
-            echo "Index {$container->getParameter("elasticsearch.$name.index")} created successfully!\n\n";
+            echo "Index {$container->getParameter("elasticsearch.${name}.index")} created successfully!\n\n";
 
             foreach ($container->getParameter("elasticsearch.{$name}.types") as $type) {
                 self::createType($name, $type, $reset);
@@ -165,7 +163,7 @@ class ElasticsearchService
         }
 
         if (true === $reset) {
-            echo "\nCreating ES type {$type} for index {$container->getParameter("elasticsearch.$name.index")}\n";
+            echo "\nCreating ES type {$type} for index {$container->getParameter("elasticsearch.${name}.index")}\n";
 
             $parameters_path = $container->getParameter("elasticsearch.{$name}.configuration_path");
             if (!file_exists("{$parameters_path}/{$type}-mapping.json")) {
@@ -181,7 +179,7 @@ class ElasticsearchService
                     'type'  => $type,
                 ]);
             } catch (\Exception $exception) {
-                echo "Type {$container->getParameter("elasticsearch.$name.index")}/{$type} doesn't exist... \n";
+                echo "Type {$container->getParameter("elasticsearch.${name}.index")}/{$type} doesn't exist... \n";
             }
 
             $this->clients[$name]->indices()->putMapping([
@@ -190,7 +188,7 @@ class ElasticsearchService
                 'body'  => $mapping,
             ]);
 
-            echo "Type {$container->getParameter("elasticsearch.$name.index")}/{$type} created successfully!\n\n";
+            echo "Type {$container->getParameter("elasticsearch.${name}.index")}/{$type} created successfully!\n\n";
         }
     }
 

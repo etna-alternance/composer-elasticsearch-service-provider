@@ -94,15 +94,16 @@ class ElasticsearchService
     {
         $container = $this->container;
 
-        if (!in_array($name, $container->getParameter('elasticsearch.names'))) {
+        if (!\in_array($name, $container->getParameter('elasticsearch.names'))) {
             throw new \Exception("Application is not configured for index {$name}");
         }
 
         if (true === $reset) {
-            echo "\nCreating elasticsearch index... {$container->getParameter("elasticsearch.${name}.index")}\n";
+            $index_raw = $container->getParameter("elasticsearch.${name}.index");
+            echo "\nCreating elasticsearch index... {$index_raw}\n";
             $this->unlock($name);
 
-            $index = "{$container->getParameter("elasticsearch.${name}.index")}-{$container->getParameter('version')}";
+            $index = "{$index_raw}-" . $container->getParameter('version');
             $alias = [
                 'index' => $index,
                 'name'  => $container->getParameter("elasticsearch.{$name}.index"),
@@ -124,7 +125,7 @@ class ElasticsearchService
 
             $parameters_path = $container->getParameter("elasticsearch.{$name}.configuration_path");
             // On récupère les settings et les mappings pour créer l'index
-            $settings = json_decode(file_get_contents("${parameters_path}/settings.json"), true);
+            $settings = json_decode(file_get_contents("{$parameters_path}/settings.json"), true);
 
             $index_params = [
                 'index' => $index,
@@ -135,7 +136,7 @@ class ElasticsearchService
 
             // Rajout de l'alias
             $this->clients[$name]->indices()->putAlias($alias);
-            echo "Index {$container->getParameter("elasticsearch.${name}.index")} created successfully!\n\n";
+            echo "Index {$index_raw} created successfully!\n\n";
 
             foreach ($container->getParameter("elasticsearch.{$name}.types") as $type) {
                 self::createType($name, $type, $reset);
@@ -154,16 +155,18 @@ class ElasticsearchService
     {
         $container = $this->container;
 
-        if (!in_array($name, $container->getParameter('elasticsearch.names'))) {
+        if (!\in_array($name, $container->getParameter('elasticsearch.names'))) {
             throw new \Exception("Application is not configured for index {$name}");
         }
 
-        if (!in_array($type, $container->getParameter("elasticsearch.{$name}.types"))) {
+        if (!\in_array($type, $container->getParameter("elasticsearch.{$name}.types"))) {
             throw new \Exception("Application is not configured for type {$type}");
         }
 
         if (true === $reset) {
-            echo "\nCreating ES type {$type} for index {$container->getParameter("elasticsearch.${name}.index")}\n";
+            $index_raw = $container->getParameter("elasticsearch.${name}.index");
+
+            echo "\nCreating ES type {$type} for index {$index_raw}\n";
 
             $parameters_path = $container->getParameter("elasticsearch.{$name}.configuration_path");
             if (!file_exists("{$parameters_path}/{$type}-mapping.json")) {
@@ -179,7 +182,7 @@ class ElasticsearchService
                     'type'  => $type,
                 ]);
             } catch (\Exception $exception) {
-                echo "Type {$container->getParameter("elasticsearch.${name}.index")}/{$type} doesn't exist... \n";
+                echo "Type {$index_raw}/{$type} doesn't exist... \n";
             }
 
             $this->clients[$name]->indices()->putMapping([
@@ -188,7 +191,7 @@ class ElasticsearchService
                 'body'  => $mapping,
             ]);
 
-            echo "Type {$container->getParameter("elasticsearch.${name}.index")}/{$type} created successfully!\n\n";
+            echo "Type {$index_raw}/{$type} created successfully!\n\n";
         }
     }
 
@@ -222,7 +225,7 @@ class ElasticsearchService
     {
         $action = ('lock' === $action) ? 'true' : 'false';
 
-        if (!in_array($name, $this->container->getParameter('elasticsearch.names'))) {
+        if (!\in_array($name, $this->container->getParameter('elasticsearch.names'))) {
             throw new \Exception("Application is not configured for index {$name}");
         }
 

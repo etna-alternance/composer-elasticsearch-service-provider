@@ -49,7 +49,7 @@ abstract class AbstractEtnaIndexer
      */
     public function indexOne($type, $id): void
     {
-        if (false === in_array($type, $this->container->getParameter("elasticsearch.{$this->name}.types"))) {
+        if (false === \in_array($type, $this->container->getParameter("elasticsearch.{$this->name}.types"))) {
             throw new \Exception("Invalid type {$type} for index {$this->name}");
         }
         $index_one_func_name = 'indexOne' . implode('', array_map('ucfirst', explode('_', $type)));

@@ -59,15 +59,18 @@ class SpecificIndexCommand extends ContainerAwareCommand
      *
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $container = $this->getContainer();
+        /** @var \ETNA\Elasticsearch\Services\ElasticsearchService */
         $elastic   = $container->get('elasticsearch.elasticsearch_service');
+        /** @var bool */
         $reset     = $input->getOption('reset');
+        /** @var string */
         $type      = $input->getOption('type');
         $action    = $reset ? 'Reindexing' : 'Indexing';
 
-        if (isset($type)) {
+        if (!empty($type)) {
             $output->writeln("<info>{$action} {$this->index_name}:{$type}...</info>");
             $elastic->createType($this->index_name, $type, $reset);
             $elastic->getIndexer($this->index_name)->reindex([$type]);
@@ -77,5 +80,7 @@ class SpecificIndexCommand extends ContainerAwareCommand
             $elastic->getIndexer($this->index_name)->reindex();
         }
         $output->writeln('<info>Done</info>');
+
+        return 0;
     }
 }

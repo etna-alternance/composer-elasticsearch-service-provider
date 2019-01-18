@@ -22,10 +22,10 @@ class ElasticsearchService
     /** @var ContainerInterface Conteneur de l'application symfony ou sont référencés les paramètres */
     private $container;
 
-    /** @var array<string|Elasticsearch\Client> La liste des différents clients Elasticsearch */
+    /** @var array<string,\Elasticsearch\Client> La liste des différents clients Elasticsearch */
     private $clients;
 
-    /** @var array<string|ETNA\Elasticsearch\AbstractEtnaIndexer> Les différents permettant les indexations */
+    /** @var array<string,\ETNA\Elasticsearch\AbstractEtnaIndexer> Les différents permettant les indexations */
     private $indexers;
 
     /**

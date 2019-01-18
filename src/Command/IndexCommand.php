@@ -45,10 +45,12 @@ class IndexCommand extends ContainerAwareCommand
      *
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $container  = $this->getContainer();
+        /** @var \ETNA\Elasticsearch\Services\ElasticsearchService */
         $elastic    = $container->get('elasticsearch.elasticsearch_service');
+        /** @var bool */
         $reset      = $input->getOption('reset');
         $index_name = $input->getOption('index-name');
         $action     = $reset ? 'Reindexing' : 'Indexing';
@@ -60,5 +62,7 @@ class IndexCommand extends ContainerAwareCommand
             $elastic->getIndexer($index_name)->reindex();
         }
         $output->writeln('<info>Done</info>');
+
+        return 0;
     }
 }

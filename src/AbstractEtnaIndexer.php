@@ -1,34 +1,58 @@
 <?php
+/**
+ * PHP version 7.1
+ *
+ * @author BLU <dev@etna-alternance.net>
+ */
 
-namespace ETNA\Silex\Provider\Elasticsearch;
+declare(strict_types=1);
 
-use Silex\Application;
+namespace ETNA\Elasticsearch;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+/**
+ * Un indexer est une classe qui va nous permettre d'indéxer les différentes données de nos applications.
+ *
+ * Cette classe abstraite est à implémenter et provide des fonctions qui permettent de guider l'implémentation
+ * d'elasticsearch dans nos applications.
+ *
+ * Il faut donc surcharcher les fonctions putDocument, removeDocument et toutes celles dépendant des types gérés
+ *
+ * @abstract
+ */
 abstract class AbstractEtnaIndexer
 {
-    protected $app;
+    /** @var ContainerInterface Le conteneur de l'application Symfony */
+    protected $container;
+
+    /** @var string Le nom de l'instance Elasticsearch */
     protected $name;
 
     /**
-     * @param Application $app
+     * Constructeur de la classe.
+     *
+     * @param ContainerInterface $container Le conteneur de l'application Symfony
+     * @param string             $name      Le nom de l'instance Elasticsearch
      */
-    public function __construct(Application $app, $name)
+    public function __construct(ContainerInterface $container, $name)
     {
-        $this->app  = $app;
-        $this->name = $name;
-
-        $this->app["elasticsearch.{$name}.reindex"]         = [$this, 'reindex'];
-        $this->app["elasticsearch.{$name}.index_one"]       = [$this, 'indexOne'];
-        $this->app["elasticsearch.{$name}.put_document"]    = [$this, 'putDocument'];
-        $this->app["elasticsearch.{$name}.remove_document"] = [$this, 'removeDocument'];
+        $this->container = $container;
+        $this->name      = $name;
     }
 
-    public function indexOne($type, $id)
+    /**
+     * Fonction permettant l'indexation d'un document bien précis en renseignant l'id concerné.
+     *
+     * @param string $type Type elasticsearch du document
+     * @param int    $id   ID du document
+     */
+    public function indexOne($type, $id): void
     {
-        if (false === in_array($type, $this->app["elasticsearch.{$this->name}.types"])) {
+        if (false === \in_array($type, $this->container->getParameter("elasticsearch.{$this->name}.types"))) {
             throw new \Exception("Invalid type {$type} for index {$this->name}");
         }
-        $index_one_func_name = "indexOne" . implode('', array_map('ucfirst', explode('_', $type)));
+        $index_one_func_name = 'indexOne' . implode('', array_map('ucfirst', explode('_', $type)));
         if (!method_exists($this, $index_one_func_name)) {
             throw new \Exception("Implement the method {$index_one_func_name} as protected to index one type {$type}");
         }
@@ -36,20 +60,23 @@ abstract class AbstractEtnaIndexer
     }
 
     /**
-     * @return void
+     * Fonction permettant l'indexation de tout les documents concernés par le(s) type(s) concernés.
+     *
+     * @param array $types Liste des différents types Elasticsearch à indexer
      */
-    public function reindex($types = [])
+    public function reindex($types = []): void
     {
-        if (!empty($invalid_types = array_diff($types, $this->app["elasticsearch.{$this->name}.types"]))) {
-            throw new \Exception("Invalid type(s) " . implode(', ', $types) . " for index {$this->name}");
+        $all_types = $this->container->getParameter("elasticsearch.{$this->name}.types");
+        if (!empty($invalid_types = array_diff($types, $all_types))) {
+            throw new \Exception('Invalid type(s) ' . implode(', ', $invalid_types) . " for index {$this->name}");
         }
 
         if (empty($types)) {
-            $types = $this->app["elasticsearch.{$this->name}.types"];
+            $types = $all_types;
         }
 
         foreach ($types as $type) {
-            $index_func_name = "index" . implode('', array_map('ucfirst', explode('_', $type)));
+            $index_func_name = 'index' . implode('', array_map('ucfirst', explode('_', $type)));
             if (!method_exists($this, $index_func_name)) {
                 throw new \Exception("Implement the method {$index_func_name} as protected to index type {$type}");
             }
@@ -58,12 +85,20 @@ abstract class AbstractEtnaIndexer
     }
 
     /**
+     * Cette s'occupe de faire l'appel HTTP pour indexer un document précis.
+     *
+     * @param string $type Le type elasticsearch
+     *
      * @return array
      */
-    abstract public function putDocument($type);
+    abstract public function putDocument($type): array;
 
     /**
-     * @return void
+     * Cette s'occupe de faire l'appel HTTP pour supprimer un document précis.
+     *
+     * @param string $type Le type elasticsearch
+     *
+     * @return array
      */
-    abstract public function removeDocument($type);
+    abstract public function removeDocument($type): array;
 }

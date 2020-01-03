@@ -1,7 +1,10 @@
 {
     "name": "etna/elasticsearch-service-provider",
     "description": "ElasticSearch Service Provider",
-    "keywords": ["elasticsearch", "silex"],
+    "keywords": [
+        "elasticsearch",
+        "silex"
+    ],
     "license": "proprietary",
     "authors": [
         {
@@ -11,9 +14,9 @@
         }
     ],
     "require": {
-        "php": ">=5.5",
+        "php": ">=7.1",
         "silex/silex": "~2.0@dev",
-        "elasticsearch/elasticsearch": "~2.0"
+        "elasticsearch/elasticsearch": "^7.4"
     },
     "config": {
         "bin-dir": "bin"
@@ -29,9 +32,9 @@
         }
     },
     "repositories": [
-       {
-           "type": "composer",
-           "url":  "http://blu-composer.herokuapp.com"
-       }
-   ]
+        {
+            "type": "composer",
+            "url": "https://blu-composer.herokuapp.com"
+        }
+    ]
 }

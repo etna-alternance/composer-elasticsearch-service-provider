@@ -29,17 +29,11 @@ class Elasticsearch implements ServiceProviderInterface
         foreach ($es_options as $db_name) {
             $name                = strtoupper($db_name);
             $elasicsearch_host   = getenv("{$name}_ELASTICSEARCH_HOST");
-            $elasticsearch_types = getenv("{$name}_ELASTICSEARCH_TYPES");
             if (false === $elasicsearch_host) {
                 throw new \Exception("{$name}_ELASTICSEARCH_HOST doesn't exist");
             }
-            if (false === $elasticsearch_types) {
-                throw new \Exception("{$name}_ELASTICSEARCH_TYPES doesn't exist");
-
-            }
             $this->es_options[$db_name] = [
-                "host"  => $elasicsearch_host,
-                "types" => explode(',', $elasticsearch_types)
+                "host" => $elasicsearch_host,
             ];
         }
     }
@@ -69,7 +63,6 @@ class Elasticsearch implements ServiceProviderInterface
 
             $app["elasticsearch.{$name}.server"] = str_replace($parsed_url['path'], '', $es_option['host']) . "/";
             $app["elasticsearch.{$name}.index"]  = $index;
-            $app["elasticsearch.{$name}.types"]  = $es_option['types'];
 
             $app["elasticsearch.{$name}"] = ClientBuilder::create()
                 ->setHosts([$app["elasticsearch.{$name}.server"]])
@@ -77,7 +70,6 @@ class Elasticsearch implements ServiceProviderInterface
         }
 
         $app['elasticsearch.create_index'] = [$this, 'createIndex'];
-        $app["elasticsearch.create_type"]  = [$this, 'createType'];
         $app['elasticsearch.lock']         = [$this, 'lock'];
         $app['elasticsearch.unlock']       = [$this, 'unlock'];
     }
@@ -131,52 +123,6 @@ class Elasticsearch implements ServiceProviderInterface
             // Rajout de l'alias
             $app["elasticsearch.{$name}"]->indices()->putAlias($alias);
             echo "Index {$app["elasticsearch.$name.index"]} created successfully!\n\n";
-
-            foreach ($app["elasticsearch.{$name}.types"] as $type) {
-                self::createType($name, $type, $reset);
-            }
-        }
-    }
-
-    public function createType($name, $type, $reset = false)
-    {
-        $app = $this->app;
-
-        if (!in_array($name, $app["elasticsearch.names"])) {
-            throw new \Exception("Application is not configured for index {$name}");
-        }
-
-        if (!in_array($type, $app["elasticsearch.{$name}.types"])) {
-            throw new \Exception("Application is not configured for type {$app["elasticsearch.$name.index"]}/{$type}");
-        }
-
-        if (true === $reset) {
-            echo "\nCreating elasticsearch type {$type} for index {$app["elasticsearch.$name.index"]}\n";
-
-            $parameters_path = $app["elasticsearch_{$name}_parameters_path"];
-            if (!file_exists("{$parameters_path}/{$type}-mapping.json")) {
-                throw new \Exception("Mapping file for type {$type} does not exist");
-            }
-            $mapping = json_decode(file_get_contents("{$parameters_path}/{$type}-mapping.json"), true);
-
-            $this->unlock($name);
-
-            try {
-                $app["elasticsearch.{$name}"]->indices()->deleteMapping([
-                    "index" => $app["elasticsearch.{$name}.index"],
-                    "type"  => $type
-                ]);
-            } catch (\Exception $exception) {
-                echo "Type {$app["elasticsearch.$name.index"]}/{$type} doesn't exist... \n";
-            }
-
-            $app["elasticsearch.{$name}"]->indices()->putMapping([
-                "index" => $app["elasticsearch.{$name}.index"],
-                "type"  => $type,
-                "body"  => $mapping
-            ]);
-
-            echo "Type {$app["elasticsearch.$name.index"]}/{$type} created successfully!\n\n";
         }
     }
 

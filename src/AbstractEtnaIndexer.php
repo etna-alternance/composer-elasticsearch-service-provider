@@ -23,47 +23,25 @@ abstract class AbstractEtnaIndexer
         $this->app["elasticsearch.{$name}.remove_document"] = [$this, 'removeDocument'];
     }
 
-    public function indexOne($type, $id)
-    {
-        if (false === in_array($type, $this->app["elasticsearch.{$this->name}.types"])) {
-            throw new \Exception("Invalid type {$type} for index {$this->name}");
-        }
-        $index_one_func_name = "indexOne" . implode('', array_map('ucfirst', explode('_', $type)));
-        if (!method_exists($this, $index_one_func_name)) {
-            throw new \Exception("Implement the method {$index_one_func_name} as protected to index one type {$type}");
-        }
-        $this->{$index_one_func_name}($id);
-    }
-
     /**
      * @return void
      */
-    public function reindex($types = [])
-    {
-        if (!empty($invalid_types = array_diff($types, $this->app["elasticsearch.{$this->name}.types"]))) {
-            throw new \Exception("Invalid type(s) " . implode(', ', $types) . " for index {$this->name}");
-        }
+    abstract public function reindex();
 
-        if (empty($types)) {
-            $types = $this->app["elasticsearch.{$this->name}.types"];
-        }
-
-        foreach ($types as $type) {
-            $index_func_name = "index" . implode('', array_map('ucfirst', explode('_', $type)));
-            if (!method_exists($this, $index_func_name)) {
-                throw new \Exception("Implement the method {$index_func_name} as protected to index type {$type}");
-            }
-            $this->{$index_func_name}();
-        }
-    }
+    /**
+     * @param mixed $id
+     *
+     * @return array
+     */
+    abstract public function indexOne($id);
 
     /**
      * @return array
      */
-    abstract public function putDocument($type);
+    abstract public function putDocument();
 
     /**
      * @return void
      */
-    abstract public function removeDocument($type);
+    abstract public function removeDocument();
 }

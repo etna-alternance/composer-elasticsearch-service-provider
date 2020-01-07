@@ -61,9 +61,8 @@ class Elasticsearch implements ServiceProviderInterface
             $parsed_url = parse_url($es_option['host']);
             $index      = ltrim($parsed_url['path'], '/');
 
-            $app["elasticsearch.{$name}.server"] = str_replace($parsed_url['path'], '', $es_option['host']) . "/";
+            $app["elasticsearch.{$name}.server"] = rtrim(str_replace($parsed_url['path'], '', $es_option['host']), "/");
             $app["elasticsearch.{$name}.index"]  = $index;
-
             $app["elasticsearch.{$name}"] = ClientBuilder::create()
                 ->setHosts([$app["elasticsearch.{$name}.server"]])
                 ->build();
@@ -115,11 +114,10 @@ class Elasticsearch implements ServiceProviderInterface
 
             $index_params = [
                 "index" => "{$app["elasticsearch.$name.index"]}-{$app["version"]}",
-                "body"  => ["settings" => $settings]
+                "body"  => $settings
             ];
             // Création de l'index
             $app["elasticsearch.$name"]->indices()->create($index_params);
-
             // Rajout de l'alias
             $app["elasticsearch.{$name}"]->indices()->putAlias($alias);
             echo "Index {$app["elasticsearch.$name.index"]} created successfully!\n\n";

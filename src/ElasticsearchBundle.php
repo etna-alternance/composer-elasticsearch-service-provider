@@ -17,7 +17,7 @@ use Symfony\Component\Console\Application;
 class ElasticsearchBundle extends \Symfony\Component\HttpKernel\Bundle\Bundle
 {
     /**
-     * Override de la fonction registerCommands pour générer une instance de commande par index puis par type.
+     * Override de la fonction registerCommands pour générer une instance de commande par index.
      *
      * @param Application $application L'application symfony
      */
@@ -26,9 +26,6 @@ class ElasticsearchBundle extends \Symfony\Component\HttpKernel\Bundle\Bundle
         $application->add(new Command\IndexCommand());
         foreach ($this->container->getParameter('elasticsearch.names') as $name) {
             $application->add(new Command\SpecificIndexCommand($name));
-            foreach ($this->container->getParameter("elasticsearch.{$name}.types") as $type) {
-                $application->add(new Command\SpecificIndexTypeCommand($name, $type));
-            }
         }
     }
 }

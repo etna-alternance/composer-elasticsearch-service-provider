@@ -25,15 +25,10 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *       name: index_name
  *       indexer: 'TestApp\Utils|FirstIndexer'
  *       host: http://elasticsearch.etna-alternance.eu:9200/index_name
- *       types:
- *         - type1
- *         - type2
  *     -
  *       name: other_index
  *       indexer: 'TestApp\Utils|OtherIndexer'
  *       host: http://elasticsearch.etna-alternance.eu:9200/other_index_name
- *       types:
- *         - type12
  * </pre>
  *
  * @example TestApp/config/packages/test/auth.php Exemple de configuration PHP
@@ -72,14 +67,6 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('host')
                                 ->isRequired()
                                 ->cannotBeEmpty()
-                            ->end()
-                            ->arrayNode('types')
-                                ->requiresAtLeastOneElement()
-                                ->isRequired()
-                                ->scalarPrototype()
-                                    ->cannotBeEmpty()
-                                    ->end()
-                                ->end()
                             ->end()
                         ->end()
                     ->end()

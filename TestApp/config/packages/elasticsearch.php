@@ -8,14 +8,12 @@ return function (ContainerConfigurator $container) {
         "instances" => [
             [
                 "name" => "contract",
-                "host" => "http://localhost:9200/contractmanager.test",
-                "types" => ["contract", "company"],
+                "host" => "http://elasticsearch:9200/contractmanager.test",
                 "indexer" => "TestApp\\Utils\\Indexers\\AppIndexer"
             ],
             [
                 "name" => "auth",
-                "host" => "http://localhost:9200/auth.test",
-                "types" => ["user"],
+                "host" => "http://elasticsearch:9200/auth.test",
                 "indexer" => "TestApp\\Utils\\Indexers\\AppIndexer"
             ]
         ]

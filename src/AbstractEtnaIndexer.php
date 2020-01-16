@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Cette classe abstraite est à implémenter et provide des fonctions qui permettent de guider l'implémentation
  * d'elasticsearch dans nos applications.
  *
- * Il faut donc surcharcher les fonctions putDocument, removeDocument et toutes celles dépendant des types gérés
+ * Il faut donc surcharger les fonctions putDocument, removeDocument, indexOne et reindex
  *
  * @abstract
  */
@@ -44,61 +44,26 @@ abstract class AbstractEtnaIndexer
     /**
      * Fonction permettant l'indexation d'un document bien précis en renseignant l'id concerné.
      *
-     * @param string $type Type elasticsearch du document
-     * @param int    $id   ID du document
+     * @param string $id ID du document
      */
-    public function indexOne($type, $id): void
-    {
-        if (false === \in_array($type, $this->container->getParameter("elasticsearch.{$this->name}.types"))) {
-            throw new \Exception("Invalid type {$type} for index {$this->name}");
-        }
-        $index_one_func_name = 'indexOne' . implode('', array_map('ucfirst', explode('_', $type)));
-        if (!method_exists($this, $index_one_func_name)) {
-            throw new \Exception("Implement the method {$index_one_func_name} as protected to index one type {$type}");
-        }
-        $this->{$index_one_func_name}($id);
-    }
+    abstract public function indexOne($id): void;
 
     /**
-     * Fonction permettant l'indexation de tout les documents concernés par le(s) type(s) concernés.
-     *
-     * @param array $types Liste des différents types Elasticsearch à indexer
+     * Fonction permettant l'indexation de tout les documents concernés de l'index.
      */
-    public function reindex($types = []): void
-    {
-        $all_types = $this->container->getParameter("elasticsearch.{$this->name}.types");
-        if (!empty($invalid_types = array_diff($types, $all_types))) {
-            throw new \Exception('Invalid type(s) ' . implode(', ', $invalid_types) . " for index {$this->name}");
-        }
-
-        if (empty($types)) {
-            $types = $all_types;
-        }
-
-        foreach ($types as $type) {
-            $index_func_name = 'index' . implode('', array_map('ucfirst', explode('_', $type)));
-            if (!method_exists($this, $index_func_name)) {
-                throw new \Exception("Implement the method {$index_func_name} as protected to index type {$type}");
-            }
-            $this->{$index_func_name}();
-        }
-    }
+    abstract public function reindex(): void;
 
     /**
      * Cette s'occupe de faire l'appel HTTP pour indexer un document précis.
      *
-     * @param string $type Le type elasticsearch
-     *
      * @return array
      */
-    abstract public function putDocument($type): array;
+    abstract public function putDocument(): array;
 
     /**
      * Cette s'occupe de faire l'appel HTTP pour supprimer un document précis.
      *
-     * @param string $type Le type elasticsearch
-     *
      * @return array
      */
-    abstract public function removeDocument($type): array;
+    abstract public function removeDocument(): array;
 }

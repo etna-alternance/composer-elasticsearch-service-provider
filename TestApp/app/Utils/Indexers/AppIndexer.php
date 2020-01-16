@@ -4,22 +4,22 @@ namespace TestApp\Utils\Indexers;
 
 class AppIndexer extends \ETNA\Elasticsearch\AbstractEtnaIndexer
 {
-    public function indexUser()
+    public function indexOne($id): void
     {
 
     }
 
-    public function indexOneUser()
+    public function reindex(): void
     {
 
     }
 
-    public function putDocument($type, $entity = null): array
+    public function putDocument($entity = null): array
     {
         return [];
     }
 
-    public function removeDocument($type, $document_id = null): array
+    public function removeDocument($document_id = null): array
     {
         return [];
     }

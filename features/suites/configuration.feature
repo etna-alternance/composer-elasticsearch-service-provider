@@ -11,15 +11,13 @@ Scénario: Configurer ElasticsearchBundle comme il faut
     {
         "elasticsearch.names": ["contract", "auth"],
         "elasticsearch.contract.host": "http://mysql.etna.localhost:9200/contractmanager",
-        "elasticsearch.contract.types": ["contract", "company"],
         "elasticsearch.contract.indexer": "TestApp\\Utils\\Indexers\\ContractIndexer",
-        "elasticsearch.contract.server": "http://mysql.etna.localhost:9200/",
+        "elasticsearch.contract.server": "http://mysql.etna.localhost:9200",
         "elasticsearch.contract.index": "contractmanager",
         "elasticsearch.contract.configuration_path": "#.*/TestApp/config/elasticsearch/contract#",
         "elasticsearch.auth.host": "http://mysql.etna.localhost:9200/auth",
-        "elasticsearch.auth.types": ["user"],
         "elasticsearch.auth.indexer": "TestApp\\Utils\\Indexers\\ContractIndexer",
-        "elasticsearch.auth.server": "http://mysql.etna.localhost:9200/",
+        "elasticsearch.auth.server": "http://mysql.etna.localhost:9200",
         "elasticsearch.auth.index": "auth",
         "elasticsearch.auth.configuration_path": "#.*/TestApp/config/elasticsearch/auth#"
     }
@@ -43,9 +41,6 @@ Plan du Scénario: Ne pas configurer ElasticsearchBundle comme il faut
         | no_instance_name.php       | The path "elasticsearch.instances.0.name" cannot contain an empty value, but got "".    |
         | no_instance_host.php       | The path "elasticsearch.instances.0.host" cannot contain an empty value, but got "".    |
         | no_instance_indexer.php    | The path "elasticsearch.instances.0.indexer" cannot contain an empty value, but got "". |
-        | no_instance_types.php      | The child node "types" at path "elasticsearch.instances.0" must be configured.          |
-        | empty_instance_type.php    | The path "elasticsearch.instances.0.types" should have at least 1 element(s) defined.   |
-        | invalid_instance_type.php  | The path "elasticsearch.instances.0.types.1" cannot contain an empty value, but got "". |
         | unexisting_config_path.php | Elasticsearch commentcatutrouvepasledossier config directory not found                  |
 
 Scénario: Mal implémenter l'indexer

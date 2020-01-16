@@ -97,7 +97,6 @@ class ElasticsearchService
         if (!\in_array($name, $container->getParameter('elasticsearch.names'))) {
             throw new \Exception("Application is not configured for index {$name}");
         }
-
         if (true === $reset) {
             $index_raw = $container->getParameter("elasticsearch.${name}.index");
             echo "\nCreating elasticsearch index... {$index_raw}\n";
@@ -129,7 +128,7 @@ class ElasticsearchService
 
             $index_params = [
                 'index' => $index,
-                'body'  => ['settings' => $settings],
+                'body'  => $settings,
             ];
             // Création de l'index
             $this->clients[$name]->indices()->create($index_params);
@@ -137,61 +136,6 @@ class ElasticsearchService
             // Rajout de l'alias
             $this->clients[$name]->indices()->putAlias($alias);
             echo "Index {$index_raw} created successfully!\n\n";
-
-            foreach ($container->getParameter("elasticsearch.{$name}.types") as $type) {
-                self::createType($name, $type, $reset);
-            }
-        }
-    }
-
-    /**
-     * Crée le mapping pour un type donné.
-     *
-     * @param string $name  Nom de l'instance concernée
-     * @param string $type  Nom du type concerné
-     * @param bool   $reset Supprime et recrée l'index
-     */
-    public function createType($name, $type, $reset = false): void
-    {
-        $container = $this->container;
-
-        if (!\in_array($name, $container->getParameter('elasticsearch.names'))) {
-            throw new \Exception("Application is not configured for index {$name}");
-        }
-
-        if (!\in_array($type, $container->getParameter("elasticsearch.{$name}.types"))) {
-            throw new \Exception("Application is not configured for type {$type}");
-        }
-
-        if (true === $reset) {
-            $index_raw = $container->getParameter("elasticsearch.${name}.index");
-
-            echo "\nCreating ES type {$type} for index {$index_raw}\n";
-
-            $parameters_path = $container->getParameter("elasticsearch.{$name}.configuration_path");
-            if (!file_exists("{$parameters_path}/{$type}-mapping.json")) {
-                throw new \Exception("Mapping file for type {$type} does not exist");
-            }
-            $mapping = json_decode(file_get_contents("{$parameters_path}/{$type}-mapping.json"), true);
-
-            $this->unlock($name);
-
-            try {
-                $this->clients[$name]->indices()->deleteMapping([
-                    'index' => $container->getParameter("elasticsearch.{$name}.index"),
-                    'type'  => $type,
-                ]);
-            } catch (\Exception $exception) {
-                echo "Type {$index_raw}/{$type} doesn't exist... \n";
-            }
-
-            $this->clients[$name]->indices()->putMapping([
-                'index' => $container->getParameter("elasticsearch.{$name}.index"),
-                'type'  => $type,
-                'body'  => $mapping,
-            ]);
-
-            echo "Type {$index_raw}/{$type} created successfully!\n\n";
         }
     }
 
@@ -229,10 +173,10 @@ class ElasticsearchService
             throw new \Exception("Application is not configured for index {$name}");
         }
 
-        $server = $this->container->getParameter("elasticsearch.{$name}.server")
+        $server = $this->container->getParameter("elasticsearch.{$name}.server") . '/'
             . $this->container->getParameter("elasticsearch.{$name}.index");
         exec(
-            "curl -XPUT '" . $server . "/_settings' -d '
+            "curl -H 'Content-Type:application/json' -XPUT '" . $server . "/_settings' -d '
             {
                 \"index\" : {
                     \"blocks.read_only\" : {$action}

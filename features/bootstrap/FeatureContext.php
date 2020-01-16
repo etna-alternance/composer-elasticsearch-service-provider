@@ -70,38 +70,33 @@ class FeatureContext extends BaseContext
     }
 
     /**
-     * @Given j'utilise l'indexer :elastic_name pour indexer le document de type :type avec l'id :id
+     * @Given j'utilise l'indexer :elastic_name pour indexer le document avec l'id :id
      */
-    public function jutiliseLindexerPourIndexerLeDocumentDeTypeAvecLid($elastic_name, $type, $id)
+    public function jutiliseLindexerPourIndexerLeDocumentAvecLid($elastic_name, $id)
     {
         $container = $this->getKernel()->getContainer();
 
         $this->getContext("ETNA\FeatureContext\ExceptionContainerContext")->try(
-            function () use ($container, $elastic_name, $type, $id) {
+            function () use ($container, $elastic_name, $id) {
                 $indexer = $container->get('elasticsearch.elasticsearch_service')->getIndexer($elastic_name);
 
-                $indexer->indexOne($type, $id);
+                $indexer->indexOne($id);
             }
         );
     }
 
     /**
-     * @Given j'utilise l'indexer :elastic_name pour indexer les documents de type :type
-     * @Given j'utilise l'indexer :elastic_name pour indexer les documents de tout les types
+     * @Given j'utilise l'indexer :elastic_name pour indexer les documents
      */
-    public function jutiliseLindexerPourIndexerLesDocumentsDeType($elastic_name, $type = null)
+    public function jutiliseLindexerPourIndexerLesDocuments($elastic_name)
     {
         $container = $this->getKernel()->getContainer();
 
         $this->getContext("ETNA\FeatureContext\ExceptionContainerContext")->try(
-            function () use ($container, $elastic_name, $type) {
+            function () use ($container, $elastic_name) {
                 $indexer = $container->get('elasticsearch.elasticsearch_service')->getIndexer($elastic_name);
 
-                if (null !== $type) {
-                    $indexer->reindex([$type]);
-                } else {
-                    $indexer->reindex();
-                }
+                $indexer->reindex();
             }
         );
     }
@@ -163,35 +158,6 @@ class FeatureContext extends BaseContext
     }
 
     /**
-     * @Given je crée le type :type sur l'elasticsearch :elastic_name
-     */
-    public function jeCreeLeTypeSurLElasticsearch($type, $elastic_name)
-    {
-        $container = $this->getContainer();
-
-        $this->getContext("ETNA\FeatureContext\ExceptionContainerContext")->try(
-            function () use ($container, $type, $elastic_name) {
-                $container->get('elasticsearch.elasticsearch_service')->createType($elastic_name, $type);
-            }
-        );
-    }
-
-    /**
-     * @Given je reset le type :type sur l'elasticsearch :elastic_name
-     */
-    public function jeResetLeTypeSurLElasticsearch($type, $elastic_name)
-    {
-        $container = $this->getContainer();
-
-        $this->getContext("ETNA\FeatureContext\ExceptionContainerContext")->try(
-            function () use ($container, $type, $elastic_name) {
-                $container->get('elasticsearch.elasticsearch_service')->createType($elastic_name, $type, true);
-            }
-        );
-    }
-
-
-    /**
      * @Given je delete l'alias de l'index de l'elasticsearch :elastic_name
      */
     public function jeDeleteLAliasDeLIndexDeLElasticsearch($elastic_name)
@@ -221,16 +187,15 @@ class FeatureContext extends BaseContext
     }
 
     /**
-     * @Given je delete le mapping du type :type de l'elasticsearch :elastic_name
+     * @Given je delete le mapping de l'elasticsearch :elastic_name
      */
-    public function jeDeleteLeMappingDuTypeDeLElasticsearch($type, $elastic_name)
+    public function jeDeleteLeMappingDuTypeDeLElasticsearch($elastic_name)
     {
         $container = $this->getContainer();
         $client    = $container->get('elasticsearch.elasticsearch_service')->getClient($elastic_name);
 
         $client->indices()->deleteMapping([
             'index' => $container->getParameter("elasticsearch.{$elastic_name}.index"),
-            'type'  => $type,
         ]);
     }
 
@@ -275,7 +240,7 @@ class FeatureContext extends BaseContext
         return $settings[$index];
     }
 
-    private function getMapping($elastic_name, $type)
+    private function getMapping($elastic_name)
     {
         $container = $this->getContainer();
         $client    = $container->get('elasticsearch.elasticsearch_service')->getClient($elastic_name);
@@ -284,7 +249,6 @@ class FeatureContext extends BaseContext
         $mapping = $client->indices()->getMapping(
             [
                 "index" => $container->getParameter("elasticsearch.{$elastic_name}.index"),
-                "type"  => $type
             ]
         );
 
@@ -332,12 +296,12 @@ class FeatureContext extends BaseContext
     }
 
     /**
-     * @Given le mapping du type :type de l'elasticsearch :elastic_name devrait être identique à :mapping_file
+     * @Given le mapping de l'elasticsearch :elastic_name devrait être identique à :mapping_file
      */
-    public function leMappingDuTypeDeLElasticsearchDevraitEtreIdentiqueA($type, $elastic_name, $mapping_file)
+    public function leMappingDeLElasticsearchDevraitEtreIdentiqueA($elastic_name, $mapping_file)
     {
         // Afin que $settings soit une stdClass
-        $mapping = json_decode(json_encode($this->getMapping($elastic_name, $type)));
+        $mapping = json_decode(json_encode($this->getMapping($elastic_name)));
 
         $expected = json_decode(file_get_contents($this->results_path . "/" . $mapping_file));
 

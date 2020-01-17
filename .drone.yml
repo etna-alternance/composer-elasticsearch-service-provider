@@ -10,7 +10,7 @@ script:
   - composer phing
   - composer coveralls
 services:
-  - bluetna/drone-elasticsearch
+  - bluetna/drone-elasticsearch:7.5.1
 notify:
   slack:
     webhook_url: $$SLACK_WEBHOOK_URL

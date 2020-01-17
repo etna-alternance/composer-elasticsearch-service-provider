@@ -45,15 +45,11 @@ abstract class AbstractEtnaIndexer
      * Fonction permettant l'indexation d'un document bien précis en renseignant l'id concerné.
      *
      * @param string $id ID du document
-     *
-     * @return void
      */
     abstract public function indexOne($id): void;
 
     /**
      * Fonction permettant l'indexation de tout les documents concernés de l'index.
-     *
-     * @return void
      */
     abstract public function reindex(): void;
 

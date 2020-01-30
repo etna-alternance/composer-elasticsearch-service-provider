@@ -1,10 +1,8 @@
 {
     "settings": {
         "index": {
-            "number_of_shards": "5",
-            "blocks": {
-                "read_only": "false"
-            },
+            "number_of_shards": "1",
+            "provided_name": "auth.test-2.0.0",
             "creation_date": "#^[0-9]+$#",
             "analysis": {
                 "filter": {

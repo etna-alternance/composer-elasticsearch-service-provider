@@ -1,35 +1,97 @@
 {
-    "index": {
-        "analysis": {
-            "analyzer": {
-                "default": {
-                    "type": "custom",
-                    "tokenizer": "standard",
-                    "filter": [
-                        "lowercase",
-                        "asciifolding",
-                        "fr_stop",
-                        "elision",
-                        "fr_snowball"
-                    ]
+    "settings": {
+        "index": {
+            "analysis": {
+                "analyzer": {
+                    "default": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "asciifolding",
+                            "fr_stop",
+                            "elision",
+                            "fr_snowball"
+                        ]
+                    },
+                    "lowercase": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase"
+                        ]
+                    }
                 },
-                "lowercase": {
-                    "type": "custom",
-                    "tokenizer": "standard",
-                    "filter": ["lowercase"]
+                "filter": {
+                    "fr_stop": {
+                        "type": "stop",
+                        "stopwords": "french"
+                    },
+                    "fr_snowball": {
+                        "type": "snowball",
+                        "language": "French"
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "properties": {
+            "id": {
+                "type": "long"
+            },
+            "login": {
+                "type": "text",
+                "fields": {
+                    "raw": {
+                        "type": "keyword"
+                    }
                 }
             },
-            "filter": {
-                "fr_stop": {
-                    "type": "stop",
-                    "stopwords": "french"
-                },
-                "fr_snowball": {
-                    "type": "snowball",
-                    "language": "French"
+            "firstname": {
+                "type": "text",
+                "fields": {
+                    "raw": {
+                        "type": "keyword"
+                    }
                 }
+            },
+            "lastname": {
+                "type": "text",
+                "fields": {
+                    "raw": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "email": {
+                "type": "text",
+                "fields": {
+                    "raw": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "roles": {
+                "type": "text",
+                "fields": {
+                    "raw": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "created_at": {
+                "type": "date",
+                "format": "Y-M-d H:m:s"
+            },
+            "updated_at": {
+                "type": "date",
+                "format": "Y-M-d H:m:s"
+            },
+            "deleted_at": {
+                "type": "date",
+                "format": "Y-M-d H:m:s"
             }
         }
     }
 }
-

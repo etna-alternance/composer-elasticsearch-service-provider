@@ -18,8 +18,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Classe définissant la commande qui va permettre l'indexation des données dans l'elasticsearch pour un index précis.
  *
  * Les paramêtres sont
- *  - --reset          Optionnel : permet de supprimer l'index et de le recréer avant d'indexer
- *  - --type|-t [type] Optionnel : permet de choisir le type de l'index concerné
+ *  - --reset      Optionnel : permet de supprimer l'index et de le recréer avant d'indexer
+ *  - --id    [id] Optionnel : l'id de l'objet à réindexer
  */
 class SpecificIndexCommand extends ContainerAwareCommand
 {
@@ -47,7 +47,7 @@ class SpecificIndexCommand extends ContainerAwareCommand
         $this->setName("elasticsearch:index:{$this->index_name}")
              ->setDescription("Indexing elasticsearch for {$this->index_name}")
              ->addOption('reset', null, null, 'Do you want to reset the index first?')
-             ->addOption('type', 't', InputOption::VALUE_OPTIONAL, 'Type to reindex')
+             ->addOption('id', null, InputOption::VALUE_OPTIONAL, 'Id of the entity to index')
         ;
     }
 
@@ -67,19 +67,19 @@ class SpecificIndexCommand extends ContainerAwareCommand
         /** @var bool */
         $reset     = $input->getOption('reset');
         /** @var string */
-        $type      = $input->getOption('type');
+        $id        = $input->getOption('id');
         $action    = $reset ? 'Reindexing' : 'Indexing';
 
-        if (!empty($type)) {
-            $output->writeln("<info>{$action} {$this->index_name}:{$type}...</info>");
-            $elastic->createType($this->index_name, $type, $reset);
-            $elastic->getIndexer($this->index_name)->reindex([$type]);
+        if (!empty($id)) {
+            $output->writeln("<info>Indexing document {$this->index_name} {$id}...</info>");
+            $elastic->getIndexer($this->index_name)->indexOne($id);
+            $output->writeln('<info>Done</info>');
         } else {
             $output->writeln("<info>{$action} {$this->index_name}...</info>");
             $elastic->createIndex($this->index_name, $reset);
             $elastic->getIndexer($this->index_name)->reindex();
+            $output->writeln('<info>Done</info>');
         }
-        $output->writeln('<info>Done</info>');
 
         return 0;
     }

@@ -60,39 +60,3 @@ Scénario: Reset l'index alors que l'index n'existe pas
     Quand       je reset l'index sur l'elasticsearch auth
     Alors       ca devrait s'être bien déroulé
     Et          les settings de l'elasticsearch auth devraient être identique à "base_settings.json"
-
-Scénario: Créer un type sur un elasticsearch configuré
-    Quand       je crée le type user sur l'elasticsearch auth
-    Alors       ca devrait s'être bien déroulé
-    Et          le mapping du type user de l'elasticsearch auth devrait être identique à "user_mapping.json"
-
-Scénario: Créer un type sur un elasticsearch non configuré
-    Etant donné que je crée le type user sur l'elasticsearch not_auth_again
-    Alors       ca ne devrait pas s'être bien déroulé
-    Et          l'exception devrait avoir comme message "Application is not configured for index not_auth_again"
-
-Scénario: Créer un type sur un elasticsearch configuré
-    Etant donné que je crée le type not_a_user sur l'elasticsearch auth
-    Alors       ca ne devrait pas s'être bien déroulé
-    Et          l'exception devrait avoir comme message "Application is not configured for type not_a_user"
-
-Scénario: Créer un type avec l'option reset sur un elasticsearch configuré
-    Etant donné que je delete le mapping du type user de l'elasticsearch auth
-    Quand       je reset le type user sur l'elasticsearch auth
-    Alors       ca devrait s'être bien déroulé
-    Et          le mapping du type user de l'elasticsearch auth devrait être identique à "user_mapping.json"
-
-Scénario: Créer un type avec l'option reset sur un elasticsearch non configuré
-    Etant donné que je reset le type user sur l'elasticsearch not_auth_again
-    Alors       ca ne devrait pas s'être bien déroulé
-    Et          l'exception devrait avoir comme message "Application is not configured for index not_auth_again"
-
-Scénario: Créer un type non géré avec l'option reset sur un elasticsearch configuré
-    Etant donné que je reset le type not_a_user sur l'elasticsearch auth
-    Alors       ca ne devrait pas s'être bien déroulé
-    Et          l'exception devrait avoir comme message "Application is not configured for type not_a_user"
-
-Scénario: Créer un type avec l'option reset sur un elasticsearch configuré sans avoir le mapping
-    Etant donné que je reset le type company sur l'elasticsearch contract
-    Alors       ca ne devrait pas s'être bien déroulé
-    Et          l'exception devrait avoir comme message "Mapping file for type company does not exist"

@@ -4,13 +4,14 @@ env:
   - COVERALLS_REPO_TOKEN=$$COVERALLS_TOKEN
   - COVERALLS_SERVICE_NAME=drone.io
 script:
-  - nb=1 ; while [ $nb -lt 20 ] && ! echo "show elasticsearch;" | curl -XGET "http://127.0.0.1:9200" ; do echo "Try n $nb ES is not ready"; nb=$(($nb + 1)); sleep 1; done
+  - echo '127.0.0.1 mariadb phiremock rabbitmq elasticsearch' > /etc/hosts
+  - nb=1 ; while [ $nb -lt 20 ] && ! echo "show elasticsearch;" | curl -XGET "http://elasticsearch:9200" ; do echo "Try n $nb ES is not ready"; nb=$(($nb + 1)); sleep 3; done
   - composer global require phpdocumentor/phpdocumentor --no-interaction --prefer-dist --no-progress
   - composer install --dev --no-interaction --prefer-dist --no-progress --no-scripts
   - composer phing
   - composer coveralls
 services:
-  - bluetna/drone-elasticsearch
+  - bluetna/drone-elasticsearch:7.5.1
 notify:
   slack:
     webhook_url: $$SLACK_WEBHOOK_URL

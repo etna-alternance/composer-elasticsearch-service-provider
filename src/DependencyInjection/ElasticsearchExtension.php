@@ -39,12 +39,11 @@ class ElasticsearchExtension extends Extension
             $all_names[] = $name;
 
             $container->setParameter("elasticsearch.{$name}.host", $instance_conf['host']);
-            $container->setParameter("elasticsearch.{$name}.types", $instance_conf['types']);
             $container->setParameter("elasticsearch.{$name}.indexer", $instance_conf['indexer']);
 
             $parsed_url = parse_url($instance_conf['host']);
             $index      = ltrim($parsed_url['path'], '/');
-            $server     = str_replace($parsed_url['path'], '', $instance_conf['host']) . '/';
+            $server     = rtrim(str_replace($parsed_url['path'], '', $instance_conf['host']), '/');
 
             $container->setParameter("elasticsearch.{$name}.server", $server);
             $container->setParameter("elasticsearch.{$name}.index", $index);

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace ETNA\Elasticsearch;
 
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use ETNA\Doctrine\Entity\AbstractIndexableEntity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -54,16 +56,89 @@ abstract class AbstractEtnaIndexer
     abstract public function reindex(): void;
 
     /**
+     * Récupère les résultats d'une query DQL et les indexe dans l'elasticsearch.
+     *
+     * @param string $dql La requête DQL
+     */
+    protected function indexQueryResult($dql): void
+    {
+        /** @var \Doctrine\ORM\EntityManager */
+        $em           = $this->container->get('doctrine.orm.entity_manager');
+        $min_id       = 0;
+        $first_result = 0;
+        $chunk_size   = 250;
+
+        echo "Indexing {$this->name} .";
+        do {
+            $query = $em->createQuery($dql);
+
+            $query
+                ->setFirstResult($first_result)
+                ->setMaxResults($chunk_size)
+                ->setParameter('min_id', $min_id);
+            $paginator = new Paginator($query);
+            $count     = 0;
+
+            foreach ($paginator as $entity) {
+                $result = $this->putDocument($entity);
+                if (!empty($result) && 'created' !== $result['result']) {
+                    print_r($result);
+                }
+                ++$count;
+                unset($entity);
+                echo '.';
+            }
+            unset($paginator);
+            $em->clear();
+            $first_result += $chunk_size;
+        } while ($count === $chunk_size);
+        echo "\n";
+    }
+
+    /**
      * Cette s'occupe de faire l'appel HTTP pour indexer un document précis.
+     *
+     * @param object $entity L'entité à supprimer
      *
      * @return array
      */
-    abstract public function putDocument(): array;
+    public function putDocument($entity = null): array
+    {
+        if (null === $entity || !is_a($entity, AbstractIndexableEntity::class)) {
+            return [];
+        }
+
+        /** @var \ETNA\Elasticsearch\Services\ElasticsearchService */
+        $service      = $this->container->get('elasticsearch.elasticsearch_service');
+        $index_params = [
+            'index' => $this->container->getParameter("elasticsearch.{$this->name}.index"),
+            'id'    => $entity->getId(),
+            'body'  => json_encode($entity->toIndex(), JSON_UNESCAPED_UNICODE),
+        ];
+
+        return $service->getClient($this->name)->index($index_params);
+    }
 
     /**
      * Cette s'occupe de faire l'appel HTTP pour supprimer un document précis.
      *
+     * @param object $entity L'entité à supprimer
+     *
      * @return array
      */
-    abstract public function removeDocument(): array;
+    public function removeDocument($entity = null): array
+    {
+        if (null === $entity || !is_a($entity, AbstractIndexableEntity::class)) {
+            return [];
+        }
+
+        /** @var \ETNA\Elasticsearch\Services\ElasticsearchService */
+        $service      = $this->container->get('elasticsearch.elasticsearch_service');
+        $index_params = [
+            'index' => $this->container->getParameter("elasticsearch.{$this->name}.index"),
+            'id'    => $entity->getId(),
+        ];
+
+        return $service->getClient($this->name)->delete($index_params);
+    }
 }
